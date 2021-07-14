@@ -1,14 +1,18 @@
-import urllib.request, urllib.parse, urllib.error,urllib.request,urllib.error,urllib.parse,re,sys,socket,os,datetime,xbmcplugin,xbmcgui, xbmcaddon,json
+import six
+from six.moves import urllib
+
+import re, sys, socket, os, datetime, json
+import xbmcplugin, xbmcgui, xbmcaddon
 from hashlib import md5
 import codecs
 
 # external libs
 sys.path.insert(0, xbmc.translatePath(os.path.join('special://home/addons/plugin.video.itv', 'lib')))
-import utils, httplib2, http.client, logging, time
+import utils, httplib2, logging, time
 import datetime
 import time
 
-PLUGIN='plugin.video.itv'
+PLUGIN = 'plugin.video.itv'
 ADDON = xbmcaddon.Addon(id=PLUGIN)
 icon = xbmc.translatePath(os.path.join('special://home/addons/plugin.video.itv', 'icon.png'))
 foricon = xbmc.translatePath(os.path.join('special://home/addons/plugin.video.itv', ''))
@@ -47,7 +51,7 @@ def download_subtitles_HLS(url, offset):
 
     logging.info('subtitles at =%s' % url)
     outfile = os.path.join(SUBTITLES_DIR, 'itv.srt')
-    fw = codecs.open(outfile, 'w', encoding='utf-8')
+    fw = open(outfile, 'w')
     
     if not url:
         fw.write("1\n0:00:00,001 --> 0:01:00,001\nNo subtitles available\n\n")
@@ -55,13 +59,13 @@ def download_subtitles_HLS(url, offset):
         return outfile
 
     try:
-        txt = OPEN_URL(url).decode('utf-8')
+        txt = OPEN_URL(url)
     
     except:
         fw.write("1\n0:00:00,001 --> 0:01:00,001\nNo subtitles available\n\n")
         fw.close()
         return outfile
-    # print txt
+    # six.print_(txt)
 
     # get styles
     styles = []
@@ -83,21 +87,21 @@ def download_subtitles_HLS(url, offset):
                     else:
                         styles.append((id, match.group(1)))
                     # span_replacer = make_span_replacer(styles)
-    # print "Retrieved styles"
-    # print styles
+    # six.print_("Retrieved styles")
+    # six.print_(styles)
 
     # get body
     body = []
     body = re.search(r'<body.*?>(.+?)</body>', txt, re.DOTALL)
     if body:
-        # print "Located body"
-        # print body.group(1).encode('utf-8')
+        # six.print_("Located body")
+        # six.print_(body.group(1).encode('utf-8'))
         frames = re.findall(r'<p(.*?)>(.*?)</p>', body.group(1), re.DOTALL)
         # frames = re.findall(r'<p.*?begin=\"(.*?)".*?end=\"(.*?)".*?style="(.*?)".*?>(.*?)</p>', body.group(1), re.DOTALL)
         if frames:
             index = 1
-            # print "Found %s frames"%len(frames)
-            # print frames
+            # six.print_("Found %s frames"%len(frames))
+            # six.print_(frames)
             for formatting, content in frames:
                 start = ''
                 match = re.search(r'begin=\"(.*?)"', formatting, re.DOTALL)
@@ -119,7 +123,7 @@ def download_subtitles_HLS(url, offset):
                 else:
                     style = False
                 start_split = re.split('\.',start)
-                # print start_split
+                # six.print_(start_split)
                 if(len(start_split)>1):
                     start_mil_f = start_split[1].ljust(3, '0')
                 else:
@@ -138,7 +142,7 @@ def download_subtitles_HLS(url, offset):
                     for num, (substyle, line) in enumerate(spans):
                         if num >0:
                             text = text+'\n'
-                        # print substyle, color, line.encode('utf-8')
+                        # six.print_(substyle, color, line.encode('utf-8'))
                         text = text+'<font color="%s">%s</font>' %  (substyle, line)
                 else:
                     if style:
@@ -146,7 +150,7 @@ def download_subtitles_HLS(url, offset):
                         text = text+'<font color="%s">%s</font>' %  (color[0], content)
                     else:
                          text = text+content
-                    # print substyle, color, line.encode('utf-8')
+                    # six.print_(substyle, color, line.encode('utf-8'))
                 entry = "%d\n%s --> %s\n%s\n\n" % (index, start_value, end_value, text)
                 if entry:
                     fw.write(entry)
@@ -190,33 +194,33 @@ def CATEGORIES():
 
 def SHOWS(url):
     f = urllib.request.urlopen(url)
-    buf = f.read().decode('utf-8')
-    buf=re.sub('&amp;','&',buf)
-    buf=re.sub('&middot;','',buf)
-    #print "BUF %s" % buf
+    buf = f.read()
+    buf = re.sub('&amp;', '&', buf)
+    buf = re.sub('&middot;', '', buf)
+    # six.print_("BUF %s" % buf)
     f.close()
     buf = buf.split('grid-list__item width--one-half width--custard--one-third')
     for p in buf:
         try:
-            linkurl= re.compile('href="(.+?)"').findall (p)[0]
-            #print linkurl
-            image= re.compile('srcset="(.+?)"').findall (p)[0]
+            linkurl = re.compile('href="(.+?)"').findall(p)[0]
+            # six.print_(linkurl)
+            image = re.compile('srcset="(.+?)"').findall(p)[0]
             if '?' in image:
                 image=image.split('?')[0] +'?w=512&h=288'
-            #print image
+            #six.print_(image)
             name= re.compile('"tout__title complex-link__target theme__target">(.+?)</h3',re.DOTALL).findall (p)[0].strip()
-            #print name
+            #six.print_(name)
             episodes = re.compile('"tout__meta theme__meta">(.+?)</p',re.DOTALL).findall (p)[0].strip()
             if 'mins' in episodes:
-               episodes = re.compile('>(.+?)</',re.DOTALL).findall (episodes)[0].strip() 
-            #print episodes
-            if 'day left' in episodes or 'days left' in episodes or episodes=='1 episode' or 'mins' in episodes:
+                episodes = re.compile('>(.+?)</', re.DOTALL).findall(episodes)[0].strip()
+                # six.print_(episodes)
+            if 'day left' in episodes or 'days left' in episodes or episodes == '1 episode' or 'mins' in episodes:
                 if not 'mins' in episodes:
-                    linkurl = linkurl+'##'
-                addDir2(name+' - [COLOR orange]%s[/COLOR]'%episodes,linkurl,3,'', '',image,'',isFolder=False)
+                    linkurl = linkurl + '##'
+                addDir2(name + ' - [COLOR orange]%s[/COLOR]' % episodes, linkurl, 3, '', '', image, '', isFolder=False)
             else:
                 if not 'no episodes' in episodes.lower():
-                    addDir(name+' - [COLOR orange]%s[/COLOR]'%episodes,linkurl,2,image)
+                    addDir(name + ' - [COLOR orange]%s[/COLOR]' % episodes, linkurl, 2, image)
         except:pass        
     setView('tvshows', 'show') 
             
@@ -242,14 +246,14 @@ def addFavorite(name,url,iconimage):
         iconimage='http://mercury.itv.com/browser/production/image?q=80&format=jpg&w=800&h=450&productionId='+iconimage
         import json
         favList = []
-        if os.path.exists(favorites)==False:
-            print ('Making Favorites File')
-            favList.append((name.split(' -')[0],url,iconimage))
+        if os.path.exists(favorites) == False:
+            six.print_('Making Favorites File')
+            favList.append((name.split(' -')[0], url, iconimage))
             a = open(favorites, "w")
             a.write(json.dumps(favList))
             a.close()
         else:
-            print ('Appending Favorites')
+            six.print_('Appending Favorites')
             with open(favorites) as f:
                 a = f.read()
             try:
@@ -266,11 +270,11 @@ def addFavorite(name,url,iconimage):
 
 def rmFavorite(name):
         import json
-        print ('Remove Favorite')
+        six.print_('Remove Favorite')
         with open(favorites) as f:
             a = f.read()
         data = json.loads(a)
-        print(len(data))
+        six.print_(len(data))
         for index in range(len(data)):
             try:
                 if data[index][0]==name:
@@ -292,18 +296,17 @@ def parse_Date(date_string,format,thestrip):
     return DATE    
     
 def EPS(name,url):
-
     f = urllib.request.urlopen(url)
-    buf = f.read().decode('utf-8')
-    buf=re.sub('&amp;','&',buf)
-    buf=re.sub('&middot;','',buf)
-    buf=re.sub('&#039;','\'',buf)
+    buf = f.read()
+    buf = re.sub('&amp;', '&', buf)
+    buf = re.sub('&middot;', '', buf)
+    buf = re.sub('&#039;', '\'', buf)
     f.close()
     buf = buf.split('more-episodes')[1]
     buf = buf.split('<div id="')[0]
     buf = buf.split('grid-list__item width--one-half width--custard--one-third')
-    NAME=name.split('-')[0]
-    uniques=[]
+    NAME = name.split('-')[0]
+    uniques = []
     for p in buf:
        
         try:
@@ -319,7 +322,7 @@ def EPS(name,url):
             #episodes = re.compile('"tout__meta theme__meta">(.+?)</p',re.DOTALL).findall (p)[0].strip()
             try:description = re.compile('tout__summary theme__subtle">(.+?)</p',re.DOTALL).findall (p)[0].strip()
             except: description = ''
-            #print description
+            #six.print_(description)
 
             date = re.compile('datetime="(.+?)">',re.DOTALL).findall (p)[0]
             try:
@@ -334,51 +337,65 @@ def EPS(name,url):
             #if ADDDATE not in uniques:
                 #uniques.append(ADDDATE)
             addDir2(NAME + ' - ' + ADDDATE,linkurl,3,date, name,image,description,isFolder=False)
-        except:pass  
-                                
+        except:pass
 
-    setView('tvshows', 'episode') 
+    setView('tvshows', 'episode')
+
 
 def OPEN_URL(url):
-    req = urllib.request.Request(url, headers={'User-Agent' : "Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G34 Safari/601.1"}) 
-    con = urllib.request.urlopen( req )
-    link= con.read()
-    return link
+    req = urllib.request.Request(url, headers={
+        'User-Agent': "Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G34 Safari/601.1"})
+    con = urllib.request.urlopen(req)
+    link = con.read()
+    if six.PY3:
+        return link.decode('utf-8')
+    else:
+        return link
 
-def PLAY_STREAM_HLS_LIVE(name,url,iconimage):
-    ENDING=''
+
+def PLAY_STREAM_HLS_LIVE(name, url, iconimage):
+    ENDING = ''
     xbmc.log("URL to fetch: %s" % url)
 
-    buf = OPEN_URL(url).decode('utf-8')
+    buf = OPEN_URL(url)
 
-    TITLE=re.compile('data-video-title="(.+?)"').findall(buf)[0]
-    POSTURL=re.compile('data-html5-playlist="(.+?)"').findall(buf)[0]
-    hmac=re.compile('data-video-hmac="(.+?)"').findall(buf)[0]
+    TITLE = re.compile('data-video-title="(.+?)"').findall(buf)[0]
+    POSTURL = re.compile('data-html5-playlist="(.+?)"').findall(buf)[0]
+    hmac = re.compile('data-video-hmac="(.+?)"').findall(buf)[0]
 
-    data  = {"user": {"itvUserId": "", "entitlements": [], "token": ""}, "device": {"manufacturer": "Safari", "model": "5", "os": {"name": "Windows NT", "version": "6.1", "type": "desktop"}}, "client": {"version": "4.1", "id": "browser"}, "variantAvailability": {"featureset": {"min": ["hls", "aes"], "max": ["hls", "aes"]}, "platformTag": "youview"}}
+    data = {"user": {"itvUserId": "", "entitlements": [], "token": ""},
+            "device": {"manufacturer": "Safari", "model": "5",
+                       "os": {"name": "Windows NT", "version": "6.1", "type": "desktop"}},
+            "client": {"version": "4.1", "id": "browser"},
+            "variantAvailability": {"featureset": {"min": ["hls", "aes"], "max": ["hls", "aes"]},
+                                    "platformTag": "youview"}}
 
     req = urllib.request.Request(POSTURL)
     jsondata = json.dumps(data)
-    jsondataasbytes = jsondata.encode('utf-8')   # needs to be bytes
+    if six.PY3:
+        jsondataasbytes = jsondata.encode('utf-8')  # needs to be bytes
+    else:
+        jsondataasbytes = jsondata
 
-    req.add_header('Host','simulcast.itv.com')
-    req.add_header('Accept','application/vnd.itv.vod.playlist.v2+json')
-    req.add_header('Proxy-Connection','keep-alive')
-    req.add_header('Accept-Language','en-gb')
-    req.add_header('Accept-Encoding','gzip, deflate')
+    req.add_header('Host', 'simulcast.itv.com')
+    req.add_header('Accept', 'application/vnd.itv.vod.playlist.v2+json')
+    req.add_header('Proxy-Connection', 'keep-alive')
+    req.add_header('Accept-Language', 'en-gb')
+    req.add_header('Accept-Encoding', 'gzip, deflate')
     req.add_header('Content-Type', 'application/json; charset=utf-8')
-    req.add_header('Origin','http://www.itv.com')
-    req.add_header('Connection','keep-alive')
-    req.add_header('User-Agent','Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G34 Safari/601.1')       
-    req.add_header('Referer',url)
-    req.add_header('hmac',hmac)
+    req.add_header('Origin', 'http://www.itv.com')
+    req.add_header('Connection', 'keep-alive')
+    req.add_header('User-Agent',
+                   'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G34 Safari/601.1')
+    req.add_header('Referer', url)
+    req.add_header('hmac', hmac)
     req.add_header('Content-Length', len(jsondataasbytes))
 
     xbmc.log("Attempting to fetch: %s" % url)
     xbmc.log("With data: %s" % data)
     xbmc.log("with HMAC: %s" % hmac)
 
-    with urllib.request.urlopen(req,jsondataasbytes) as f:
+    with urllib.request.urlopen(req, jsondataasbytes) as f:
         content = f.read()
 
     link=json.loads(content)
@@ -398,7 +415,7 @@ def PLAY_STREAM_HLS_LIVE(name,url,iconimage):
     if __settings__.getSetting('subtitles_control') == 'true':
         if subtitles_exist == 1:
             subtitles_file = download_subtitles_HLS(SUBLINK, '')
-            print ("Subtitles at ", subtitles_file)
+            six.print_("Subtitles at ", subtitles_file)
             there_are_subtitles=1
         
     STREAM =  BEG+END
@@ -416,39 +433,48 @@ def PLAY_STREAM_HLS_LIVE(name,url,iconimage):
 
 def HLS(url,iconimage):
     xbmc.log("URL to fetch: %s" % url)
-    #xbmc.log(str(url))  
+    # xbmc.log(str(url))
     if url.endswith('##'):
-        url=url.split('##')[0]
-        buf = OPEN_URL(url).decode('utf-8')
-            
-        link=buf.split('data-episode-current')[1]
-        url=re.compile('href="(.+?)"').findall(link)[0]
-    
-    #xbmc.log(str(url))            
-    ENDING=''
-    buf = OPEN_URL(url).decode('utf-8')
+        url = url.split('##')[0]
+        buf = OPEN_URL(url)
 
-    TITLE=re.compile('data-video-title="(.+?)"').findall(buf)[0]
-    POSTURL=re.compile('data-video-id="(.+?)"').findall(buf)[0]
-    hmac=re.compile('data-video-hmac="(.+?)"').findall(buf)[0]
+        link = buf.split('data-episode-current')[1]
+        url = re.compile('href="(.+?)"').findall(link)[0]
 
-    data  = {"user": {"itvUserId": "", "entitlements": [], "token": ""}, "device": {"manufacturer": "Safari", "model": "5", "os": {"name": "Windows NT", "version": "6.1", "type": "desktop"}}, "client": {"version": "4.1", "id": "browser"}, "variantAvailability": {"featureset": {"min": ["hls", "aes", "outband-webvtt"], "max": ["hls", "aes", "outband-webvtt"]}, "platformTag": "youview"}}
+    # xbmc.log(str(url))
+    ENDING = ''
+    buf = OPEN_URL(url)
+
+    TITLE = re.compile('data-video-title="(.+?)"').findall(buf)[0]
+    POSTURL = re.compile('data-video-id="(.+?)"').findall(buf)[0]
+    hmac = re.compile('data-video-hmac="(.+?)"').findall(buf)[0]
+
+    data = {"user": {"itvUserId": "", "entitlements": [], "token": ""},
+            "device": {"manufacturer": "Safari", "model": "5",
+                       "os": {"name": "Windows NT", "version": "6.1", "type": "desktop"}},
+            "client": {"version": "4.1", "id": "browser"}, "variantAvailability": {
+            "featureset": {"min": ["hls", "aes", "outband-webvtt"], "max": ["hls", "aes", "outband-webvtt"]},
+            "platformTag": "youview"}}
 
     req = urllib.request.Request(POSTURL)
     jsondata = json.dumps(data)
-    jsondataasbytes = jsondata.encode('utf-8')   # needs to be bytes
+    if six.PY3:
+        jsondataasbytes = jsondata.encode('utf-8')  # needs to be bytes
+    else:
+        jsondataasbytes = jsondata
 
-    req.add_header('Host','magni.itv.com')
-    req.add_header('hmac',hmac)
-    req.add_header('Accept','application/vnd.itv.vod.playlist.v2+json')
-    req.add_header('Proxy-Connection','keep-alive')
-    req.add_header('Accept-Language','en-gb')
-    req.add_header('Accept-Encoding','gzip, deflate')
+    req.add_header('Host', 'magni.itv.com')
+    req.add_header('hmac', hmac)
+    req.add_header('Accept', 'application/vnd.itv.vod.playlist.v2+json')
+    req.add_header('Proxy-Connection', 'keep-alive')
+    req.add_header('Accept-Language', 'en-gb')
+    req.add_header('Accept-Encoding', 'gzip, deflate')
     req.add_header('Content-Type', 'application/json; charset=utf-8')
-    req.add_header('Origin','http://www.itv.com')
-    req.add_header('Connection','keep-alive')
-    req.add_header('User-Agent','Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G34 Safari/601.1')       
-    req.add_header('Referer',url)
+    req.add_header('Origin', 'http://www.itv.com')
+    req.add_header('Connection', 'keep-alive')
+    req.add_header('User-Agent',
+                   'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G34 Safari/601.1')
+    req.add_header('Referer', url)
     req.add_header('Content-Length', len(jsondataasbytes))
 
     xbmc.log("Attempting to fetch: %s" % POSTURL)
@@ -456,13 +482,17 @@ def HLS(url,iconimage):
     xbmc.log("HMAC: %s" % hmac)
     xbmc.log("Refer: %s" % url)
 
-    with urllib.request.urlopen(req,jsondataasbytes) as f:
-        content = f.read()
+    try:
+        content = urllib.request.urlopen(req, jsondataasbytes).read()
+    except:
+        dialog = xbmcgui.Dialog()
+        dialog.ok('ITV Player', '', 'Not Available', '')
+        return ''
 
-    link=json.loads(content)
+    link = json.loads(content)
 
     BEG = link['Playlist']['Video']['Base']
-    bb= link['Playlist']['Video']['MediaFiles']
+    bb = link['Playlist']['Video']['MediaFiles']
     try:
         SUBLINK = link['Playlist']['Video']['Subtitles'][0]['Href']
         subtitles_exist = 1
@@ -476,7 +506,7 @@ def HLS(url,iconimage):
     if __settings__.getSetting('subtitles_control') == 'true':
         if subtitles_exist == 1:
             subtitles_file = download_subtitles_HLS(SUBLINK, '')
-            print ("Subtitles at ", subtitles_file)
+            six.print_("Subtitles at ", subtitles_file)
             there_are_subtitles=1
         
     STREAM =  BEG+END
