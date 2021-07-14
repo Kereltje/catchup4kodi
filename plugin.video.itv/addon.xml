@@ -12,8 +12,10 @@
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
     <summary>TV from ITV Hub</summary>
-    <description>This add-on enables the playing of Live and Catchup TV from ITV Hub (UK only)</description>
-    <disclaimer lang="en">This add-on is a front end to the ITV Hub website. It is not an official ITV product. A UK TV Licence is required to watch the live, catch-up, or on-demand TV content.</disclaimer>
+    <description>This add-on enables the playing of Catchup TV from ITV Hub (UK only)</description>
+    <disclaimer lang="en">This add-on is a front end to the ITV Hub website. It is not an official ITV product. A UK TV
+      Licence is required to watch the live, catch-up, or on-demand TV content.
+    </disclaimer>
     <assets>
       <icon>icon.png</icon>
   </assets>
