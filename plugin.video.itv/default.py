@@ -104,14 +104,20 @@ def download_subtitles_hls(url):
                     # begin="00:00:27:00"
                     start = match.group(1)
                     start_value = start[0:8] + "," + start[9:11] + '0'
-                end = ''
+                else:
+                    # skip as start_value is required to write an entry to file
+                    continue
+
                 match = re.search(r'end=\"(.*?)"', formatting, re.DOTALL)
                 if match:
                     #      0123456789
                     # end="00:00:29:06"
                     end = match.group(1)
                     end_value = end[0:8] + "," + end[9:11] + '0'
-                style = None
+                else:
+                    # skip as end_value is required to write an entry to file
+                    continue
+
                 match = re.search(r'style=\"(.*?)"', formatting, re.DOTALL)
                 if match:
                     style = match.group(1)
