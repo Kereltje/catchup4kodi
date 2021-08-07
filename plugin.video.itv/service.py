@@ -1,17 +1,17 @@
-import os,xbmc,xbmcaddon
+import os
+import xbmc
+import xbmcaddon
 
-PLUGIN='plugin.video.itv'
-ADDON = xbmcaddon.Addon(id=PLUGIN)
+plugin_id = 'plugin.video.itv'
+addon = xbmcaddon.Addon(id=plugin_id)
 
-
-if ADDON.getSetting('delcache')=='true':
+if addon.getSetting('delcache') == 'true':
     cache = xbmc.translatePath(os.path.join('special://temp'))
 
     for root, dirs, files in os.walk(cache):
-
-
-                    
         for f in files:
-            if not '.log' in f:
-                try:os.unlink(os.path.join(root, f))
-                except:pass
+            if '.log' not in f:
+                try:
+                    os.unlink(os.path.join(root, f))
+                except OSError:
+                    pass
