@@ -407,7 +407,7 @@ def play_stream_hls_live(url, iconimage):
     req.add_header('Accept-Language', 'en-gb')
     req.add_header('Accept-Encoding', 'gzip, deflate')
     req.add_header('Content-Type', 'application/json; charset=utf-8')
-    req.add_header('Origin', 'http://www.itv.com')
+    req.add_header('Origin', 'https://www.itv.com')
     req.add_header('Connection', 'keep-alive')
     req.add_header('User-Agent',
                    'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) '
@@ -499,7 +499,7 @@ def play_hls(url, iconimage):
     req.add_header('Accept-Language', 'en-gb')
     req.add_header('Accept-Encoding', 'gzip, deflate')
     req.add_header('Content-Type', 'application/json; charset=utf-8')
-    req.add_header('Origin', 'http://www.itv.com')
+    req.add_header('Origin', 'https://www.itv.com')
     req.add_header('Connection', 'keep-alive')
     req.add_header('User-Agent',
                    'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) '
