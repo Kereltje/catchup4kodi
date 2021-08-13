@@ -12,32 +12,25 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
-# from hashlib import md5
-# import codecs
-# from bs4 import BeautifulSoup
 
 # external libs
 import utils
 
-PLUGIN = 'plugin.video.itv'
-ADDON = xbmcaddon.Addon(id=PLUGIN)
+PLUGIN_ID = 'plugin.video.itv'
+ADDON = xbmcaddon.Addon(id=PLUGIN_ID)
 icon = xbmc.translatePath(os.path.join('special://home/addons/plugin.video.itv', 'icon.png'))
 foricon = xbmc.translatePath(os.path.join('special://home/addons/plugin.video.itv', ''))
 
 # setup cache dir
 __scriptname__ = 'ITV'
 __scriptid__ = "plugin.video.itv"
-__addoninfo__ = utils.get_addoninfo(__scriptid__)
-__addon__ = __addoninfo__["addon"]
-__settings__ = xbmcaddon.Addon(id=__scriptid__)
+__addoninfo__ = utils.get_addoninfo(PLUGIN_ID)
 
 DIR_USERDATA = xbmc.translatePath(__addoninfo__["profile"])
 SUBTITLES_DIR = os.path.join(DIR_USERDATA, 'Subtitles')
 IMAGE_DIR = os.path.join(DIR_USERDATA, 'Images')
 FAVORITES_FILE = os.path.join(DIR_USERDATA, 'favorites')
 
-if not os.path.isdir(DIR_USERDATA):
-    os.makedirs(DIR_USERDATA)
 if not os.path.isdir(SUBTITLES_DIR):
     os.makedirs(SUBTITLES_DIR)
 if not os.path.isdir(IMAGE_DIR):
@@ -533,7 +526,7 @@ def play_hls(url, iconimage):
         stream_url_resource = bb[0]['Href']
 
     there_are_subtitles = 0
-    if __settings__.getSetting('subtitles_control') == 'true':
+    if ADDON.getSetting('subtitles_control') == 'true':
         if subtitles_exist == 1:
             subtitles_file = download_subtitles_hls(sub_title_link)
             six.print_("Subtitles at ", subtitles_file)
