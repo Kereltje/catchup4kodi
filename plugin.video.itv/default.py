@@ -244,7 +244,8 @@ def sub_menu_favorites():
 
 def add_favorite(name, url, iconimage):
     # TODO: getting icon appears to fail
-    iconimage = 'http://mercury.itv.com/browser/production/image?q=80&format=jpg&w=800&h=450&productionId=' + iconimage
+    iconimage = 'https://hubimages.itv.com/episode/{production_id}?w=800&h=450&q=80&blur=0&bg=false&image_format=jpg' \
+        .format(production_id=iconimage)
     import json
     fav_list = []
     if os.path.exists(FAVORITES_FILE) is False:
